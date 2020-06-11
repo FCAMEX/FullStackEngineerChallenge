@@ -11,19 +11,16 @@ import TableContainer from '@material-ui/core/TableContainer';
 import Paper from '@material-ui/core/Paper';
 import AppNavbar from './AppNavbar'
 import {Link, withRouter} from 'react-router-dom'
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
+import AddBoxIcon from '@material-ui/icons/AddBox';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
-import RateReviewIcon from '@material-ui/icons/RateReview';
 
-
-class EmployeeList extends React.Component {
+class EmployeeReviews extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {employees: [], isLoading: true};
+        this.state = {reviews: [], isLoading: true};
         this.remove = this.remove.bind(this);
         this.redirect = this.redirect.bind(this);
     }
@@ -31,9 +28,9 @@ class EmployeeList extends React.Component {
     componentDidMount() {
         this.setState({isLoading: true});
 
-        fetch('api/employees')
+        fetch('/api/userReviews')
             .then(response => response.json())
-            .then(data => this.setState({employees: data._embedded.employees, isLoading: false}));
+            .then(data => this.setState({reviews: data, isLoading: false}));
     }
 
     async remove(id) {
@@ -54,31 +51,30 @@ class EmployeeList extends React.Component {
     }
 
     render() {
-        const {employees, isLoading} = this.state;
+        const {reviews, isLoading} = this.state;
 
         if (isLoading) {
             return <p>Loading...</p>;
         }
 
-        const groupList = employees.map(employee => {
+        const groupList = reviews.map(review => {
+            // const address = `${employee.address || ''} ${employee.city || ''} ${employee.stateOrProvince || ''}`;
+            return <TableRow key={review.reviewId}>
+                <TableCell style={{whiteSpace: 'nowrap'}}><Typography>{review.authorName}</Typography></TableCell>
+                <TableCell style={{whiteSpace: 'nowrap'}}><Typography>{review.title}</Typography></TableCell>
+                <TableCell style={{whiteSpace: 'nowrap'}}><Typography>{review.content}</Typography></TableCell>
 
-            return <TableRow key={employee.employeeId}>
-                <TableCell style={{whiteSpace: 'nowrap'}}><Typography>{employee.firstName}</Typography></TableCell>
-                <TableCell style={{whiteSpace: 'nowrap'}}><Typography>{employee.lastName}</Typography></TableCell>
-                <TableCell style={{whiteSpace: 'nowrap'}}><Typography>{employee.title}</Typography></TableCell>
-                <TableCell style={{whiteSpace: 'nowrap'}}><Typography>{employee.department}</Typography></TableCell>
+
                 <TableCell>
                     <ButtonGroup>
-                        <Button variant="contained" color="default" startIcon={<EditIcon/>}
-                                onClick={() => this.redirect("/employees/" + employee.employeeId, employee.firstName + " " + employee.lastName)}>Edit</Button>
-                        <Button variant="contained" color="secondary" startIcon={<DeleteIcon/>}
-                                onClick={() => this.remove(employee.employeeId)}>Delete</Button>
-                        <Button variant="contained" color="primary" startIcon={<RateReviewIcon/>}
-                                onClick={() => this.redirect("/reviews/" + employee.employeeId, employee.firstName + " " + employee.lastName)}>Review</Button>
+                        <Button disabled={review.hasFeedback} variant="contained" color="default"
+                                startIcon={<AddBoxIcon/>}
+                                onClick={() => this.redirect("/feedback/" + review.reviewId)}>Feedback</Button>
                     </ButtonGroup>
                 </TableCell>
             </TableRow>
         });
+
 
         return (
             <div>
@@ -91,12 +87,8 @@ class EmployeeList extends React.Component {
 
                         <Grid item>
                             <Box mt={2}>
-                                <Typography variant="h5" type="title">Employees</Typography>
+                                <Typography variant="h5" type="title">Reviews</Typography>
                             </Box>
-                        </Grid>
-                        <Grid item>
-                            <Button variant="contained" color="primary" onClick={() => this.redirect("/employees/new")}>Add
-                                New Employee</Button>
                         </Grid>
                     </Grid>
 
@@ -104,11 +96,10 @@ class EmployeeList extends React.Component {
                         <Table>
                             <TableHead>
                                 <TableRow>
-                                    <TableCell width="20%"> <Typography>First Name</Typography></TableCell>
-                                    <TableCell width="20%"><Typography>Last Name</Typography></TableCell>
+                                    <TableCell width="20%"><Typography>Reviewer</Typography></TableCell>
                                     <TableCell width="20%"><Typography>Title</Typography></TableCell>
-                                    <TableCell width="20%"><Typography>Department</Typography></TableCell>
-                                    <TableCell align="center" width="20%"><Typography>Actions</Typography></TableCell>
+                                    <TableCell width="40%"><Typography>Content</Typography></TableCell>
+                                    <TableCell width="10%"><Typography>Actions</Typography></TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
@@ -122,4 +113,4 @@ class EmployeeList extends React.Component {
     }
 }
 
-export default withRouter(EmployeeList);
+export default withRouter(EmployeeReviews);
